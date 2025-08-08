@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Simi Maskay - Sopa de Letras Quechua</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #8B4513 0%, #CD853F 50%, #D2691E 100%);
+      padding: 10px;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: hidden;
+    }
+    
+    .game-container {
+      max-width: 1300px;
+      width: 100%;
+      background: linear-gradient(145deg, #FFF8DC, #FFFACD);
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      border: 3px solid #DAA520;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+      position: relative;
+    }
+    
+    .game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #8B4513;
+      margin-bottom: 5px;
+      font-size: 2.2em;
+      text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.3);
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #A0522D;
+      margin-bottom: 15px;
+      font-style: italic;
+      text-align: center;
+      font-size: 1.1em;
+    }
+    
+    .quechua-subtitle {
+      color: #8B4513;
+      margin-bottom: 20px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 1em;
+      font-style: italic;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      flex-wrap: wrap;
+    }
+    
+    .stat {
+      background: linear-gradient(145deg, #F5DEB3, #DEB887);
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid #DAA520;
+      box-shadow: 0 3px 10px rgba(139, 69, 19, 0.2);
+      color: #8B4513;
+      font-size: 14px;
+    }
+
+    .grid-container {
+      position: relative;
+      user-select: none;
+      margin-bottom: 20px;
+      touch-action: none;
+    }
+
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      grid-template-rows: repeat(15, 1fr);
+      gap: 1px;
+      background: linear-gradient(145deg, #DEB887, #D2691E);
+      padding: 10px;
+      border-radius: 15px;
+      box-shadow: inset 0 3px 15px rgba(139, 69, 19, 0.3);
+      border: 2px solid #DAA520;
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 1;
+    }
+    
+    .grid-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #FFFACD;
+      border: 1px solid #DAA520;
+      font-size: 12px;
+      font-weight: bold;
+      color: #8B4513;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      position: relative;
+      cursor: pointer;
+      touch-action: none;
+      min-height: 25px;
+    }
+    
+    .grid-cell:hover {
+      background: #F0E68C;
+      transform: scale(1.05);
+      box-shadow: 0 0 8px rgba(218, 165, 32, 0.6);
+    }
+    
+    .grid-cell.selecting {
+      background: #FFD700 !important;
+      color: #8B4513;
+      transform: scale(1.1);
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+      border-color: #B8860B;
+      z-index: 10;
+    }
+    
+    .grid-cell.found {
+      background: #32CD32 !important;
+      color: white;
+      animation: foundPulse 0.8s ease-in-out;
+      border-color: #228B22;
+    }
+
+    @keyframes foundPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); background: #FFD700; }
+      100% { transform: scale(1); }
+    }
+
+    .sidebar {
+      background: linear-gradient(145deg, #F5DEB3, #FFFACD);
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(139, 69, 19, 0.2);
+      border: 2px solid #DAA520;
+      overflow-y: auto;
+      max-height: 80vh;
+    }
+
+    .theme-selector {
+      margin-bottom: 20px;
+    }
+
+    .theme-selector h4 {
+      margin-bottom: 15px;
+      color: #8B4513;
+      text-align: center;
+      font-size: 1.2em;
+    }
+
+    .theme-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .theme-btn {
+      padding: 12px 8px;
+      border: 2px solid #DAA520;
+      background: #FFFACD;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 11px;
+      font-weight: bold;
+      color: #8B4513;
+      text-align: center;
+      touch-action: manipulation;
+    }
+
+    .theme-btn:hover, .theme-btn:active {
+      background: #F0E68C;
+      transform: translateY(-2px);
+    }
+
+    .theme-btn.active {
+      background: linear-gradient(45deg, #DAA520, #B8860B);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .difficulty-selector {
+      margin-bottom: 20px;
+    }
+
+    .difficulty-selector h4 {
+      margin-bottom: 10px;
+      color: #8B4513;
+      text-align: center;
+    }
+
+    .difficulty-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .difficulty-btn {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #DAA520;
+      background: #FFFACD;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 11px;
+      font-weight: bold;
+      color: #8B4513;
+      text-align: center;
+      touch-action: manipulation;
+    }
+
+    .difficulty-btn.active {
+      background: linear-gradient(45deg, #8B4513, #A0522D);
+      color: white;
+    }
+
+    .words-to-find {
+      margin-bottom: 20px;
+    }
+
+    .words-to-find h3 {
+      color: #8B4513;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 1.1em;
+    }
+
+    .word-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .word-item {
+      padding: 8px 10px;
+      background: #FFFACD;
+      border: 2px solid #DAA520;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .word-item:hover {
+      background: #F0E68C;
+      transform: translateX(3px);
+    }
+
+    .word-item.found {
+      background: linear-gradient(45deg, #32CD32, #228B22);
+      color: white;
+      text-decoration: line-through;
+      transform: scale(0.95);
+    }
+
+    .word-translation {
+      font-size: 10px;
+      color: #A0522D;
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    .word-item.found .word-translation {
+      color: #E0FFE0;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .btn {
+      padding: 12px 15px;
+      border: none;
+      background: linear-gradient(45deg, #8B4513, #A0522D);
+      color: white;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      text-align: center;
+      border: 2px solid #654321;
+      touch-action: manipulation;
+    }
+    
+    .btn:hover, .btn:active {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
+    }
+    
+    .btn-success {
+      background: linear-gradient(45deg, #228B22, #32CD32);
+      border-color: #006400;
+    }
+
+    .btn-info {
+      background: linear-gradient(45deg, #DAA520, #B8860B);
+      border-color: #8B7355;
+    }
+    
+    .btn-warning {
+      background: linear-gradient(45deg, #CD853F, #D2691E);
+      border-color: #8B4513;
+    }
+
+    .message {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message.win {
+      background: linear-gradient(45deg, #98FB98, #90EE90);
+      color: #006400;
+      border: 3px solid #32CD32;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 15px;
+      background: #DEB887;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 15px 0;
+      border: 2px solid #DAA520;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(45deg, #32CD32, #228B22);
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 8px;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.success {
+      background: linear-gradient(45deg, #32CD32, #228B22);
+    }
+
+    .inca-pattern {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 35px;
+      height: 35px;
+      background: linear-gradient(45deg, #DAA520, #B8860B);
+      border: 2px solid #8B4513;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    /* Estilos específicos para móviles */
+    @media (max-width: 768px) {
+      body {
+        padding: 5px;
+        align-items: flex-start;
+      }
+
+      .game-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 10px;
+        max-width: 100%;
+        min-height: auto;
+      }
+
+      h1 {
+        font-size: 1.8em;
+        margin-bottom: 5px;
+      }
+
+      .subtitle {
+        font-size: 1em;
+        margin-bottom: 10px;
+      }
+
+      .quechua-subtitle {
+        font-size: 0.9em;
+        margin-bottom: 15px;
+      }
+
+      .stats {
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      .stat {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .word-grid {
+        max-width: 350px;
+        padding: 8px;
+        gap: 1px;
+      }
+
+      .grid-cell {
+        font-size: 14px;
+        font-weight: bold;
+        min-height: 22px;
+        border-radius: 3px;
+      }
+
+      .sidebar {
+        order: 2;
+        max-height: none;
+        overflow-y: visible;
+      }
+
+      .game-area {
+        order: 1;
+      }
+
+      .theme-buttons {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+
+      .theme-btn {
+        padding: 10px 6px;
+        font-size: 10px;
+      }
+
+      .difficulty-btn {
+        padding: 8px;
+        font-size: 10px;
+      }
+
+      .btn {
+        padding: 12px;
+        font-size: 14px;
+      }
+
+      .word-list {
+        max-height: 200px;
+      }
+
+      .word-item {
+        padding: 6px 8px;
+        font-size: 13px;
+      }
+
+      .word-translation {
+        font-size: 9px;
+      }
+
+      .inca-pattern {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+      }
+    }
+
+    /* Estilos para tablets */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .game-container {
+        grid-template-columns: 1fr;
+        max-width: 600px;
+      }
+      
+      .word-grid {
+        max-width: 400px;
+      }
+      
+      .grid-cell {
+        font-size: 13px;
+        min-height: 28px;
+      }
+
+      .theme-buttons {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Estilos para pantallas muy pequeñas */
+    @media (max-width: 480px) {
+      .word-grid {
+        max-width: 300px;
+      }
+
+      .grid-cell {
+        font-size: 12px;
+        min-height: 20px;
+      }
+
+      .theme-buttons {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+
+      .theme-btn {
+        font-size: 9px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="inca-pattern">🏔️</div>
+    
+    <div class="game-area">
+      <h1>🏔️ SIMI MASKAY</h1>
+      <p class="subtitle">Sopa de Letras en Quechua Chanka</p>
+      <p class="quechua-subtitle">"Simikunata maskaspa pukllasun" - Juguemos buscando palabras</p>
+      
+      <div class="stats">
+        <div class="stat">📝 Tarisqa: <span id="foundWords">0</span>/<span id="totalWords">8</span></div>
+        <div class="stat">⏱️ Tiempo: <span id="timer">00:00</span></div>
+        <div class="stat">🎯 Tema: <span id="currentTheme">Ayllu</span></div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      
+      <div class="grid-container">
+        <div class="word-grid" id="wordGrid"></div>
+      </div>
+
+      <div id="message"></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="theme-selector">
+        <h4>🎨 Temas / Yuyaykuna:</h4>
+        <div class="theme-buttons">
+          <button class="theme-btn active" onclick="changeTheme('family')">👨‍👩‍👧‍👦 Ayllu<br><small>Familia</small></button>
+          <button class="theme-btn" onclick="changeTheme('nature')">🌿 Pacha<br><small>Naturaleza</small></button>
+          <button class="theme-btn" onclick="changeTheme('animals')">🦙 Uywa<br><small>Animales</small></button>
+          <button class="theme-btn" onclick="changeTheme('food')">🌽 Mikuy<br><small>Comida</small></button>
+          <button class="theme-btn" onclick="changeTheme('body')">👤 Aycha<br><small>Cuerpo</small></button>
+          <button class="theme-btn" onclick="changeTheme('colors')">🌈 Llimpi<br><small>Colores</small></button>
+          <button class="theme-btn" onclick="changeTheme('numbers')">🔢 Yupay<br><small>Números</small></button>
+          <button class="theme-btn" onclick="changeTheme('time')">⏰ Pacha<br><small>Tiempo</small></button>
+        </div>
+      </div>
+
+      <div class="difficulty-selector">
+        <h4>📊 Sasay / Dificultad:</h4>
+        <div class="difficulty-buttons">
+          <button class="difficulty-btn active" onclick="changeDifficulty('easy')">Mana Sasa</button>
+          <button class="difficulty-btn" onclick="changeDifficulty('medium')">Chawpi</button>
+          <button class="difficulty-btn" onclick="changeDifficulty('hard')">Sasa</button>
+        </div>
+      </div>
+
+      <div class="words-to-find">
+        <h3>🎯 Simikunata maskana:</h3>
+        <div class="word-list" id="wordList"></div>
+      </div>
+      
+      <div class="controls">
+        <button class="btn btn-success" onclick="newGame()">🔄 Musuq Pukllana</button>
+        <button class="btn btn-info" onclick="showHint()">💡 Yanapakuy</button>
+        <button class="btn btn-warning" onclick="showHelp()">❓ Yachachiy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const gameState = {
+      currentTheme: 'family',
+      difficulty: 'easy',
+      gridSize: { easy: 12, medium: 15, hard: 18 },
+      currentGridSize: 12,
+      grid: [],
+      wordsToFind: [],
+      foundWords: [],
+      isSelecting: false,
+      startCell: null,
+      currentSelection: [],
+      timer: 0,
+      timerInterval: null,
+      hintsUsed: 0,
+      lastTouchPosition: null,
+      touchStartTime: 0
+    };
+
+    const wordSets = {
+      family: {
+        name: 'Ayllu',
+        words: {
+          easy: [
+            { word: 'MAMAY', translation: 'Madre' },
+            { word: 'TAYTAY', translation: 'Padre' },
+            { word: 'WAWA', translation: 'Bebé' },
+            { word: 'TURI', translation: 'Hermano' },
+            { word: 'PANA', translation: 'Hermana' },
+            { word: 'AWKI', translation: 'Abuelo' },
+            { word: 'KAKA', translation: 'Tío' }
+          ],
+          medium: [
+            { word: 'AWICHA', translation: 'Abuela' },
+            { word: 'CHURIN', translation: 'Hijo varón' },
+            { word: 'ÑAÑA', translation: 'Hija Mujer' },
+            { word: 'SIPAS', translation: 'Muchacha' },
+            { word: 'MAQTA', translation: 'Muchacho' },
+            { word: 'MASA', translation: 'Cuñado' },
+            { word: 'QATIY', translation: 'Seguir' },
+            { word: 'KUYAY', translation: 'Amar' },
+            { word: 'AYNI', translation: 'Reciprocidad' }
+          ],
+          hard: [
+            { word: 'LLUMCHUY', translation: 'Cuñada' },
+            { word: 'ILLAPA', translation: 'Rayo/Nombre' },
+            { word: 'SUMAQ', translation: 'Hermosa' },
+            { word: 'WAYNA', translation: 'Joven varón' },
+            { word: 'PASÑA', translation: 'Joven mujer' },
+            { word: 'TAYTA', translation: 'Señor/Padre' },
+            { word: 'PANAY', translation: 'Hermanita' },
+            { word: 'WAUQI', translation: 'Hermano' },
+            { word: 'KUYAY', translation: 'Cariño' }
+          ]
+        }
+      },
+      nature: {
+        name: 'Pacha',
+        words: {
+          easy: [
+            { word: 'INTI', translation: 'Sol' },
+            { word: 'KILLA', translation: 'Luna' },
+            { word: 'PARA', translation: 'Lluvia' },
+            { word: 'WAYRA', translation: 'Viento' },
+            { word: 'YAKU', translation: 'Agua' },
+            { word: 'NINA', translation: 'Fuego' },
+            { word: 'RUMI', translation: 'Piedra' },
+            { word: 'RITY', translation: 'Hielo' }
+          ],
+          medium: [
+            { word: 'QUCHA', translation: 'Laguna' },
+            { word: 'URQU', translation: 'Cerro' },
+            { word: 'MAYU', translation: 'Río' },
+            { word: 'WAYQU', translation: 'Riachuelo' },
+            { word: 'PUYU', translation: 'Nube' },
+            { word: 'QATA', translation: 'Ladera' },
+            { word: 'CHAKRA', translation: 'Chacra' },
+            { word: 'CHIRI', translation: 'Frío' },
+            { word: 'URQU', translation: 'Montaña' },
+            { word: 'QUNY', translation: 'Calor' }
+          ],
+          hard: [
+            { word: 'QULLQI', translation: 'Plata/Dinero' },
+            { word: 'KUSKA', translation: 'Juntos' },
+            { word: 'PUKYU', translation: 'Manantial' },
+            { word: 'CHASKA', translation: 'Estrella' },
+            { word: 'LLIPLLA', translation: 'Rayo' },
+            { word: 'CHIRAPA', translation: 'Arcoíris' },
+            { word: 'SACHA', translation: 'Arbol'},
+            { word: 'ALLPA', translation: 'Tierra' },
+            { word: 'CHAKA', translation: 'Puente' },
+            { word: 'ÑAN', translation: 'Camino' },
+            { word: 'QURI', translation: 'Oro' },
+            { word: 'HURA', translation: 'Hierva' },
+            { word: 'QAWANA', translation: 'Mirador' }
+          ]
+        }
+      },
+      animals: {
+        name: 'Uywa',
+        words: {
+          easy: [
+            { word: 'LLAMA', translation: 'Llama' },
+            { word: 'ALPAKA', translation: 'Alpaca' },
+            { word: 'MISI', translation: 'Gato' },
+            { word: 'ALLQU', translation: 'Perro' },
+            { word: 'WALLPA', translation: 'Gallina' },
+            { word: 'QUWY', translation: 'Cuy' },
+            { word: 'ATUQ', translation: 'Zorro' },
+            { word: 'UMIÑA', translation: 'Oveja' }
+          ],
+          medium: [
+            { word: 'AÑAS', translation: 'Zorrillo' },
+            { word: 'QARACHUPA', translation: 'ZarigÜeya' },
+            { word: 'UNCHUCHUKU', translation: 'Comadreja' },
+            { word: 'TARUKA', translation: 'Venado' },
+            { word: 'PUMA', translation: 'Puma' },
+            { word: 'UKUKU', translation: 'Oso' },
+            { word: 'KUNTUR', translation: 'Cóndor' },
+            { word: 'KUCHI', translation: 'Cerdo' },
+            { word: 'ANKA', translation: 'Águila' }
+          ],
+          hard: [
+            { word: 'SIWAR', translation: 'Colibrí' },
+            { word: 'UKUCHA', translation: 'Ratón' },
+            { word: 'AMARU', translation: 'Serpiente' },
+            { word: 'CHIWCHY', translation: 'Pollito' },
+            { word: 'KUSILLO', translation: 'Mono' },
+            { word: 'CHALLWA', translation: 'Pez' },
+            { word: 'UTULU', translation: 'Gallo' },
+            { word: 'PICHIRU', translation: 'Pájaro' },
+            { word: 'WAYANAKUY', translation: 'Golondrina' },
+            { word: 'WAMAN', translation: 'Alcon' },
+            { word: 'YUTU', translation: 'Perdiz' },
+            { word: 'WISKAKU', translation: 'Vizcacha' },
+            { word: 'TUKU', translation: 'Búho' },
+            { word: 'ISU', translation: 'Caballo' }
+          ]
+        }
+      },
+      food: {
+        name: 'Mikuy',
+        words: {
+          easy: [
+            { word: 'PAPA', translation: 'Papa' },
+            { word: 'SARA', translation: 'Maíz' },
+            { word: 'KINWA', translation: 'Quinua' },
+            { word: 'UQA', translation: 'Oca' },
+            { word: 'KAÑIWA', translation: 'Kañiwa' },
+            { word: 'API', translation: 'Mazamorra' },
+            { word: 'TANTA', translation: 'Pan' }
+          ],
+          medium: [
+            { word: 'CHUÑU', translation: 'Papa seca' },
+            { word: 'KANKASQA', translation: 'Tostado' },
+            { word: 'CHAQRU', translation: 'Verdura' },
+            { word: 'SUNKHA', translation: 'Barba de choclo' },
+            { word: 'YAWAR', translation: 'Sangre' },
+            { word: 'QAMKA', translation: 'Maíz tostado' },
+            { word: 'PIRI', translation: 'Condimento' },
+            { word: 'TIMPU', translation: 'Hervido' }
+          ],
+          hard: [
+            { word: 'CHAYASQA', translation: 'Cocido' },
+            { word: 'KACHUY', translation: 'Masticar' },
+            { word: 'MACHKA', translation: 'Harina' },
+            { word: 'QAPCHI', translation: 'Ensalada' },
+            { word: 'CHAPU', translation: 'Mezclado' },
+            { word: 'RUPAQ', translation: 'Caliente' },
+            { word: 'LLAMPU', translation: 'Suave' },
+            { word: 'UCHU', translation: 'Ají' },
+            { word: 'KUMAR', translation: 'Camote' },
+            { word: 'INCHI', translation: 'Maní' },
+            { word: 'KACHI', translation: 'Sal' },
+            { word: 'MISKIQ', translation: 'Azúcar' },
+            { word: 'NINA', translation: 'Fuego' },
+            { word: 'QUSNI', translation: 'Humo' }
+          ]
+        }
+      },
+      body: {
+        name: 'Aycha',
+        words: {
+          easy: [
+            { word: 'UMA', translation: 'Cabeza' },
+            { word: 'ÑAWI', translation: 'Ojo' },
+            { word: 'RINRI', translation: 'Oreja' },
+            { word: 'SIMI', translation: 'Boca' },
+            { word: 'MAKI', translation: 'Mano' },
+            { word: 'CHAKI', translation: 'Pie' },
+            { word: 'KIRU', translation: 'Diente' },
+            { word: 'QALLU', translation: 'Lengua' }
+          ],
+          medium: [
+            { word: 'KUNKA', translation: 'Cuello' },
+            { word: 'TULLU', translation: 'Hueso' },
+            { word: 'AYCHA', translation: 'Carne/Cuerpo' },
+            { word: 'WIQSA', translation: 'Barriga' },
+            { word: 'QASHU', translation: 'Pecho' },
+            { word: 'ANKU', translation: 'Pierna' },
+            { word: 'SIKI', translation: 'Trasero' },
+            { word: 'CHUKCHA', translation: 'Cabello' }
+          ],
+          hard: [
+            { word: 'PURIY', translation: 'Caminar' },
+            { word: "RIKCHAY", translation: 'Despertar' },
+            { word: 'PUÑUY', translation: 'Dormir' },
+            { word: 'RIMANA', translation: 'Hablar' },
+            { word: 'MASKAY', translation: 'Buscar' },
+            { word: 'PUKLLAY', translation: 'Jugar' },
+            { word: 'TAKINA', translation: 'Cantar' },
+            { word: 'ASIY', translation: 'Reir' },
+            { word: 'MIKUY', translation: 'Comer' },
+            { word: 'SAMAY', translation: 'Respirar' },
+            { word: 'UPYAY', translation: 'Tomar' },
+            { word: 'TUSUNA', translation: 'Bailar' }
+          ]
+        }
+      },
+      colors: {
+        name: 'Llimpi',
+        words: {
+          easy: [
+            { word: 'PUKA', translation: 'Rojo' },
+            { word: 'QILLU', translation: 'Amarillo' },
+            { word: 'ANQAS', translation: 'Azul' },
+            { word: 'QUMIR', translation: 'Verde' },
+            { word: 'YANA', translation: 'Negro' },
+            { word: 'YURAQ', translation: 'Blanco' },
+            { word: 'UQI', translation: 'Gris' },
+            { word: 'KULLI', translation: 'Morado' }
+          ],
+          medium: [
+            { word: 'QARAWI', translation: 'Amarillo claro' },
+            { word: 'KILLMU', translation: 'Arcoíris' },
+            { word: 'PUCHKA', translation: 'Color café' },
+            { word: 'QAMYAPUKA', translation: 'Rojo claro' },
+            { word: 'CHUYA', translation: 'Transparente' },
+            { word: 'CHILLCHI', translation: 'Rosa' },
+            { word: 'WAYTA', translation: 'Flor' },
+            { word: 'SUMAQ', translation: 'Bonito' }
+          ],
+          hard: [
+            { word: 'CHIRI', translation: 'Helado' },
+            { word: 'QURY', translation: 'Dorado' },
+            { word: 'LLIMPIN', translation: 'Colorear' },
+            { word: 'CHIMPA', translation: 'Al frente' },
+            { word: 'PAWAY', translation: 'Volar' },
+            { word: 'CHAPUSQA', translation: 'Mezclado' },
+            { word: 'WAQLLA', translation: 'Collar' },
+            { word: 'WAYRA', translation: 'Viento' }
+          ]
+        }
+      },
+      numbers: {
+        name: 'Yupay',
+        words: {
+          easy: [
+            { word: 'HUK', translation: 'Uno' },
+            { word: 'ISKAY', translation: 'Dos' },
+            { word: 'KINSA', translation: 'Tres' },
+            { word: 'TAWA', translation: 'Cuatro' },
+            { word: 'PICHQA', translation: 'Cinco' },
+            { word: 'SUQTA', translation: 'Seis' },
+            { word: 'QANCHIS', translation: 'Siete' },
+            { word: 'PUSAQ', translation: 'Ocho' }
+          ],
+          medium: [
+            { word: 'ISQUN', translation: 'Nueve' },
+            { word: 'CHUNKA', translation: 'Diez' },
+            { word: 'CHUNKA ISKAYNIYUQ', translation: 'Doce' },
+            { word: 'PACHAK', translation: 'Cien' },
+            { word: 'WARANQA', translation: 'Mil' },
+            { word: 'HUNU', translation: 'Millón' },
+            { word: 'YUPAY', translation: 'Contar' },
+            { word: 'ISKAY CHUNKA', translation: 'Veinte' }
+          ],
+          hard: [
+            { word: 'LLUNA', translation: 'Billon' },
+            { word: 'CHUNKA KINSA', translation: 'Trece' },
+            { word: 'CHUNKA TAWA', translation: 'Catorce' },
+            { word: 'CHAWPI', translation: 'Mitad' },
+            { word: 'HIPAN', translation: 'Siguiente' },
+            { word: 'ÑAWPA', translation: 'Primero' },
+            { word: 'TUKUY', translation: 'Todo' },
+            { word: 'QULQAN', translation: 'Trillon' }
+          ]
+        }
+      },
+      time: {
+        name: 'Pacha',
+        words: {
+          easy: [
+            { word: 'PACHA', translation: 'Tierra' },
+            { word: 'INTI', translation: 'Sol' },
+            { word: 'KILLA', translation: 'Luna' },
+            { word: 'PUNCHAW', translation: 'Día' },
+            { word: 'TUTA', translation: 'Noche' },
+            { word: 'WATA', translation: 'Año' },
+            { word: 'Killa', translation: 'Mes' },
+            { word: 'SINPU', translation: 'Semana' }
+          ],
+          medium: [
+            { word: 'PAQARIN', translation: 'Amanecer' },
+            { word: 'TUSUY', translation: 'Bailar' },
+            { word: 'CHAUPI PUNCHAY', translation: 'Mediodía' },
+            { word: 'CHAUPY TUTA', translation: 'Medianoche' },
+            { word: 'WAK', translation: 'Tiempo' },
+            { word: 'UTQAY', translation: 'Rápido' },
+            { word: 'CHAYMANTA', translation: 'Después' }
+          ],
+          hard: [
+            { word: 'HIPAN', translation: 'Futuro' },
+            { word: 'ÑAWPA', translation: 'Pasado' },
+            { word: 'KAY', translation: 'Ahora' },
+            { word: 'CHUNKA ISKAY', translation: 'Doce' },
+            { word: 'QAWANA', translation: 'Observar' },
+            { word: 'MITAQ', translation: 'Estaciones' },
+            { word: 'PUQUY', translation: 'Estacion lluviosa' },
+            { word: 'CHIRAW', translation: 'Estacion seca' }
+          ]
+        }
+      }
+    };
+
+    // Función mejorada para detectar dispositivos táctiles
+    function isTouchDevice() {
+      return (('ontouchstart' in window) ||
+              (navigator.maxTouchPoints > 0) ||
+              (navigator.msMaxTouchPoints > 0));
+    }
+
+    // Función para obtener coordenadas tanto de mouse como de touch
+    function getEventCoordinates(e) {
+      if (e.touches && e.touches.length > 0) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+      } else {
+        return { x: e.clientX, y: e.clientY };
+      }
+    }
+
+    // Función para obtener el elemento bajo las coordenadas
+    function getElementFromCoordinates(x, y) {
+      return document.elementFromPoint(x, y);
+    }
+
+    // Función para inicializar el juego
+    function initGame() {
+      gameState.foundWords = [];
+      gameState.hintsUsed = 0;
+      gameState.timer = 0;
+      clearInterval(gameState.timerInterval);
+      document.getElementById('timer').textContent = '00:00';
+      document.getElementById('foundWords').textContent = 0;
+      document.getElementById('currentTheme').textContent = wordSets[gameState.currentTheme].name;
+      document.getElementById('message').innerHTML = '';
+
+      const words = getWords();
+      gameState.wordsToFind = words.map(w => w.word);
+      gameState.currentGridSize = gameState.gridSize[gameState.difficulty];
+
+      generateGrid();
+      renderGrid();
+      renderWordList();
+      startTimer();
+    }
+
+    // Función para obtener las palabras según el tema y la dificultad
+    function getWords() {
+      const theme = wordSets[gameState.currentTheme];
+      const difficulty = gameState.difficulty;
+      return theme.words[difficulty];
+    }
+
+    // Función para generar la cuadrícula de letras
+    function generateGrid() {
+      const size = gameState.currentGridSize;
+      gameState.grid = Array.from({ length: size }, () => Array(size).fill(''));
+
+      const directions = [
+        { dx: 0, dy: 1 },
+        { dx: 1, dy: 0 },
+        { dx: 1, dy: 1 },
+        { dx: 1, dy: -1 }
+      ];
+
+      for (const { word } of getWords()) {
+        let placed = false;
+        for (let attempts = 0; attempts < 100 && !placed; attempts++) {
+          const dir = directions[Math.floor(Math.random() * directions.length)];
+          const x = Math.floor(Math.random() * size);
+          const y = Math.floor(Math.random() * size);
+          const len = word.length;
+
+          const endX = x + dir.dx * (len - 1);
+          const endY = y + dir.dy * (len - 1);
+
+          if (endX < 0 || endX >= size || endY < 0 || endY >= size) continue;
+
+          let canPlace = true;
+          for (let i = 0; i < len; i++) {
+            const cx = x + dir.dx * i;
+            const cy = y + dir.dy * i;
+            if (gameState.grid[cx][cy] !== '' && gameState.grid[cx][cy] !== word[i]) {
+              canPlace = false;
+              break;
+            }
+          }
+
+          if (canPlace) {
+            for (let i = 0; i < len; i++) {
+              const cx = x + dir.dx * i;
+              const cy = y + dir.dy * i;
+              gameState.grid[cx][cy] = word[i];
+            }
+            placed = true;
+          }
+        }
+      }
+
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          if (gameState.grid[i][j] === '') {
+            gameState.grid[i][j] = letters[Math.floor(Math.random() * letters.length)];
+          }
+        }
+      }
+    }
+
+    // Función para renderizar la cuadrícula con soporte táctil mejorado
+    function renderGrid() {
+      const grid = document.getElementById('wordGrid');
+      grid.innerHTML = '';
+      
+      // Ajustar el tamaño de la grilla según el dispositivo
+      const isMobile = window.innerWidth <= 768;
+      const gridSize = isMobile ? Math.min(gameState.currentGridSize, 12) : gameState.currentGridSize;
+      
+      grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+      grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          const cell = document.createElement('div');
+          cell.className = 'grid-cell';
+          cell.textContent = gameState.grid[row][col];
+          cell.dataset.row = row;
+          cell.dataset.col = col;
+
+          // Eventos para dispositivos táctiles
+          cell.addEventListener('touchstart', handleTouchStart, { passive: false });
+          cell.addEventListener('touchmove', handleTouchMove, { passive: false });
+          cell.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+          // Eventos para mouse (PC)
+          cell.addEventListener('mousedown', handleMouseDown);
+          cell.addEventListener('mouseenter', handleMouseEnter);
+          cell.addEventListener('mouseup', handleMouseUp);
+
+          grid.appendChild(cell);
+        }
+      }
+
+      // Eventos globales para finalizar la selección
+      document.addEventListener('mouseup', stopSelection);
+      document.addEventListener('touchend', stopSelection, { passive: false });
+      document.addEventListener('touchcancel', stopSelection, { passive: false });
+    }
+
+    // Función para renderizar la lista de palabras
+    function renderWordList() {
+      const list = document.getElementById('wordList');
+      list.innerHTML = '';
+      const words = getWords();
+      
+      document.getElementById('totalWords').textContent = words.length;
+      
+      words.forEach(({ word, translation }) => {
+        const item = document.createElement('div');
+        item.className = 'word-item';
+        item.innerHTML = `${word}<div class="word-translation">${translation}</div>`;
+        item.dataset.word = word;
+        list.appendChild(item);
+      });
+    }
+
+    // Manejadores de eventos táctiles mejorados
+    function handleTouchStart(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      gameState.isSelecting = true;
+      gameState.startCell = e.target;
+      gameState.currentSelection = [e.target];
+      gameState.touchStartTime = Date.now();
+      
+      const coords = getEventCoordinates(e);
+      gameState.lastTouchPosition = coords;
+      
+      e.target.classList.add('selecting');
+      
+      // Feedback háptico si está disponible
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    }
+
+    function handleTouchMove(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (!gameState.isSelecting) return;
+      
+      const coords = getEventCoordinates(e);
+      const element = getElementFromCoordinates(coords.x, coords.y);
+      
+      if (element && element.classList.contains('grid-cell')) {
+        clearSelection();
+        const start = gameState.startCell;
+        const end = element;
+        const cells = getCellsInLine(start, end);
+        gameState.currentSelection = cells;
+        cells.forEach(cell => cell.classList.add('selecting'));
+      }
+      
+      gameState.lastTouchPosition = coords;
+    }
+
+    function handleTouchEnd(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (!gameState.isSelecting) return;
+      
+      // Verificar si fue un toque rápido (tap) o un arrastre
+      const touchDuration = Date.now() - gameState.touchStartTime;
+      
+      if (touchDuration < 200 && gameState.currentSelection.length === 1) {
+        // Fue un tap rápido, resaltar la celda brevemente
+        const cell = gameState.currentSelection[0];
+        cell.style.background = '#FFD700';
+        setTimeout(() => {
+          if (!cell.classList.contains('found')) {
+            cell.style.background = '';
+          }
+        }, 300);
+      }
+      
+      checkSelection();
+      stopSelection();
+    }
+
+    // Manejadores de eventos de mouse (para PC)
+    function handleMouseDown(e) {
+      e.preventDefault();
+      if (isTouchDevice()) return; // Evitar conflictos en dispositivos táctiles
+      
+      gameState.isSelecting = true;
+      gameState.startCell = e.target;
+      gameState.currentSelection = [e.target];
+      e.target.classList.add('selecting');
+    }
+
+    function handleMouseEnter(e) {
+      if (!gameState.isSelecting || isTouchDevice()) return;
+      
+      clearSelection();
+      const start = gameState.startCell;
+      const end = e.target;
+      const cells = getCellsInLine(start, end);
+      gameState.currentSelection = cells;
+      cells.forEach(cell => cell.classList.add('selecting'));
+    }
+
+    function handleMouseUp(e) {
+      e.preventDefault();
+      if (!gameState.isSelecting || isTouchDevice()) return;
+      
+      checkSelection();
+      stopSelection();
+    }
+
+    // Función para verificar si la selección forma una palabra válida
+    function checkSelection() {
+      if (gameState.currentSelection.length === 0) return;
+      
+      const selectedText = gameState.currentSelection.map(cell => cell.textContent).join('');
+      const reversedText = selectedText.split('').reverse().join('');
+
+      const match = gameState.wordsToFind.find(word => word === selectedText || word === reversedText);
+      
+      if (match && !gameState.foundWords.includes(match)) {
+        // Palabra encontrada
+        gameState.foundWords.push(match);
+        gameState.currentSelection.forEach(cell => cell.classList.add('found'));
+        
+        // Marcar la palabra en la lista
+        document.querySelectorAll('.word-item').forEach(item => {
+          if (item.dataset.word === match) {
+            item.classList.add('found');
+          }
+        });
+        
+        // Feedback háptico para éxito
+        if (navigator.vibrate) {
+          navigator.vibrate([50, 50, 50]);
+        }
+        
+        updateStats();
+        checkWin();
+      } else {
+        // Selección inválida, limpiar
+        clearSelection();
+      }
+    }
+
+    // Función para detener la selección
+    function stopSelection() {
+      gameState.isSelecting = false;
+      gameState.startCell = null;
+      gameState.lastTouchPosition = null;
+    }
+
+    // Función para limpiar la selección actual
+    function clearSelection() {
+      document.querySelectorAll('.grid-cell.selecting').forEach(cell => {
+        cell.classList.remove('selecting');
+      });
+    }
+
+    // Función mejorada para obtener celdas en línea
+    function getCellsInLine(start, end) {
+      if (!start || !end) return [];
+      
+      const startRow = parseInt(start.dataset.row);
+      const startCol = parseInt(start.dataset.col);
+      const endRow = parseInt(end.dataset.row);
+      const endCol = parseInt(end.dataset.col);
+
+      const deltaRow = endRow - startRow;
+      const deltaCol = endCol - startCol;
+
+      // Verificar si la línea es válida (horizontal, vertical o diagonal)
+      if (deltaRow !== 0 && deltaCol !== 0 && Math.abs(deltaRow) !== Math.abs(deltaCol)) {
+        return [start]; // Solo devolver la celda inicial si no es una línea válida
+      }
+
+      const steps = Math.max(Math.abs(deltaRow), Math.abs(deltaCol));
+      const stepRow = steps === 0 ? 0 : deltaRow / steps;
+      const stepCol = steps === 0 ? 0 : deltaCol / steps;
+
+      const cells = [];
+      for (let i = 0; i <= steps; i++) {
+        const row = startRow + Math.round(stepRow * i);
+        const col = startCol + Math.round(stepCol * i);
+        const cell = document.querySelector(`.grid-cell[data-row="${row}"][data-col="${col}"]`);
+        if (cell) {
+          cells.push(cell);
+        }
+      }
+
+      return cells;
+    }
+
+    // Función para actualizar estadísticas
+    function updateStats() {
+      const found = gameState.foundWords.length;
+      const total = gameState.wordsToFind.length;
+      document.getElementById('foundWords').textContent = found;
+      document.getElementById('progressFill').style.width = `${(found / total) * 100}%`;
+    }
+
+    // Función para verificar victoria
+    function checkWin() {
+      if (gameState.foundWords.length === gameState.wordsToFind.length) {
+        clearInterval(gameState.timerInterval);
+        const minutes = Math.floor(gameState.timer / 60).toString().padStart(2, '0');
+        const seconds = (gameState.timer % 60).toString().padStart(2, '0');
+        
+        // Feedback háptico de victoria
+        if (navigator.vibrate) {
+          navigator.vibrate([200, 100, 200, 100, 200]);
+        }
+        
+        document.getElementById('message').innerHTML = `
+          <div class="message win">
+            ¡Allillan! 🎉<br>
+            ¡Tukuy simikunata tarirqanki!<br>
+            Tiempo: ${minutes}:${seconds}
+          </div>
+        `;
+      }
+    }
+
+    // Función para iniciar el temporizador
+    function startTimer() {
+      gameState.timerInterval = setInterval(() => {
+        gameState.timer++;
+        const minutes = Math.floor(gameState.timer / 60).toString().padStart(2, '0');
+        const seconds = (gameState.timer % 60).toString().padStart(2, '0');
+        document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+      }, 1000);
+    }
+
+    // Funciones de control del juego
+    function newGame() {
+      initGame();
+    }
+
+    function showHint() {
+      if (gameState.hintsUsed >= 3) {
+        alert("¡Ya usaste todos los intentos de ayuda!");
+        return;
+      }
+      
+      const remaining = gameState.wordsToFind.filter(w => !gameState.foundWords.includes(w));
+      if (remaining.length === 0) return;
+      
+      const hint = remaining[Math.floor(Math.random() * remaining.length)];
+      document.querySelectorAll('.word-item').forEach(item => {
+        if (item.dataset.word === hint) {
+          item.style.background = "#FFD700";
+          setTimeout(() => {
+            if (!item.classList.contains('found')) {
+              item.style.background = "";
+            }
+          }, 2000);
+        }
+      });
+      
+      gameState.hintsUsed++;
+      
+      // Feedback háptico para pista
+      if (navigator.vibrate) {
+        navigator.vibrate(100);
+      }
+    }
+
+    function showHelp() {
+      const helpText = `🎯 INSTRUCCIONES:
+
+📱 Para móviles:
+• Toca y arrastra para seleccionar palabras
+• Las palabras pueden estar en cualquier dirección
+• Mantén presionado y desliza para seleccionar
+
+🖱️ Para PC:
+• Haz clic y arrastra para seleccionar
+• Usa el mouse para navegar por la grilla
+
+🎮 General:
+• Busca todas las palabras de la lista
+• Al encontrar una, se marcará en verde
+• Completa todas para ganar
+• Usa las pistas si necesitas ayuda
+
+¡Allillanchu! ¡Juguemos buscando palabras en quechua!`;
+      
+      alert(helpText);
+    }
+
+    function changeTheme(theme) {
+      gameState.currentTheme = theme;
+      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.theme-btn[onclick*="${theme}"]`).classList.add('active');
+      initGame();
+    }
+
+    function changeDifficulty(difficulty) {
+      gameState.difficulty = difficulty;
+      document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.difficulty-btn[onclick*="${difficulty}"]`).classList.add('active');
+      initGame();
+    }
+
+    // Ajustar el tamaño de la grilla según el tamaño de pantalla
+    function adjustGridForScreen() {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        // En móviles, limitar el tamaño máximo de la grilla
+        if (gameState.difficulty === 'hard') {
+          gameState.currentGridSize = 15;
+        } else if (gameState.difficulty === 'medium') {
+          gameState.currentGridSize = 12;
+        } else {
+          gameState.currentGridSize = 10;
+        }
+      } else {
+        gameState.currentGridSize = gameState.gridSize[gameState.difficulty];
+      }
+    }
+
+    // Evento para redimensionar la ventana
+    window.addEventListener('resize', function() {
+      adjustGridForScreen();
+      renderGrid();
+    });
+
+    // Prevenir el comportamiento predeterminado de touch para evitar el scroll
+    document.addEventListener('touchmove', function(e) {
+      if (gameState.isSelecting) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // Inicialización del juego
+    window.addEventListener('load', function() {
+      adjustGridForScreen();
+      initGame();
+    });
+  </script>
+</body>
+</html>
